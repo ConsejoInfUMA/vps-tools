@@ -13,14 +13,14 @@ A todos los miembros del consejo se le genera una cuenta en nuestro servidor.
 
 Tenemos disponibles los siguientes servicios:
 
-- Nextcloud, disponible en {url}/nextcloud. Este es nuestro sitio principal de trabajo.
+- Nextcloud, disponible en {url}/nextcloud Este es nuestro sitio principal de trabajo.
 
 Éstas son tus credenciales:
 
 Nombre de usuario: {username}
 Contraseña: {password}
 
-Puedes cambiar tu contraseña en {url}.
+Puedes cambiar tu contraseña en {url}
 """
 
 TITLE = "¡Bienvenid@ al CEETSII!"
