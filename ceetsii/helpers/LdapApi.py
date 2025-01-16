@@ -106,10 +106,10 @@ class LdapApi:
                 "lldap_set_password",
                 # Desarrollo
                 #"docker", "compose", "exec", "lldap", "/app/lldap_set_password",
-                #"--base-url", self.base_url,
-                #"--token", self.token,
-                #"--username", user.identifier,
-                #"--password", user.password
+                "--base-url", self.base_url,
+                "--token", self.token,
+                "--username", user.identifier,
+                "--password", user.password
             ])
 
             return cmd.returncode == 0
