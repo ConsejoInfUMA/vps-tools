@@ -3,15 +3,12 @@ import csv
 from os import remove as removefile
 from os.path import isfile
 
-from requests import Session
 from ceetsii.modules.Base import Base
-from ceetsii.helpers import Option, User
+from ceetsii.helpers import Option, User, LdapApi
 
 
 class Ldap(Base):
-    s = Session()
-
-    base_url: str
+    api: LdapApi
     out_dir = "out"
     options: list
 
@@ -33,16 +30,13 @@ class Ldap(Base):
             )
         ]
 
-        # Connection
-        self.s.headers.update({
-            "Authorization": f"Bearer {token}"
-        })
+        self.api = LdapApi(base_url, token)
 
     def main(self):
         self._pick(self.options, "Elige una acción")
 
     def enum(self):
-        users = self._getUsers()
+        users = self.api.getUsers()
         self._printUsers(users)
 
     def csv(self):
@@ -59,7 +53,7 @@ class Ldap(Base):
             raise Exception("Ese archivo no existe")
 
         excel_users = []
-        ldap_users = self._getUsers()
+        ldap_users = self.api.getUsers()
 
         with open(csvStr) as csvFile:
             reader = csv.reader(csvFile, delimiter=',', quotechar='"')
@@ -95,47 +89,6 @@ class Ldap(Base):
     def commit(self):
         pass
 
-    def _getUsers(self)-> list[User]:
-        res = self._req({
-            "operationName": "ListUsersQuery",
-            "query": """
-            query ListUsersQuery($filters: RequestFilter) {
-                users(filters: $filters) {
-                    id
-                    email
-                    displayName
-                    firstName
-                    lastName
-                    creationDate
-                }
-            }
-            query ListUserNames($filters: RequestFilter) {
-                users(filters: $filters) {
-                    id
-                    displayName
-                }
-            }
-            """,
-            "variables": {
-                "filters": None
-            }
-        })
-
-        users = []
-        apiUsers = res["data"]["users"]
-
-        for user in apiUsers:
-            users.append(User(
-                firstName=user["firstName"],
-                lastName=user["lastName"],
-                email=user["email"],
-                identifier=user["id"],
-                displayName=user["displayName"],
-                password=''
-            ))
-
-        return users
-
     def _printUsers(self, users: list[User]):
         for user in users:
             print(f"{user.displayName} ({user.email})")
@@ -150,10 +103,3 @@ class Ldap(Base):
             writer.writerow(["Nombre", "Apellidos", "Email", "Nombre de usuario", "Nombre completo", "Contraseña"])
             for user in users:
                 writer.writerow(user.toRow())
-
-    def _req(self, body: dict)-> dict:
-        res = self.s.post(f"{self.base_url}/api/graphql", json=body)
-        if not res.ok:
-            raise Exception("Graphql error")
-
-        return res.json()
