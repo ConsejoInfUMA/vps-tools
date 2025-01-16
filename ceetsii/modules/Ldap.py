@@ -3,8 +3,8 @@ from os import remove as removefile
 from os.path import isfile
 
 from ceetsii.modules.Base import Base
-from ceetsii.helpers import Option, User, LdapApi
-
+from ceetsii.helpers import LdapApi
+from ceetsii.models import Option, User
 
 class Ldap(Base):
     api: LdapApi

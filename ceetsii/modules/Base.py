@@ -1,5 +1,5 @@
 from pick import pick
-from ceetsii.helpers import Option
+from ceetsii.models import Option
 
 class Base:
     def _pick(self, options: list[Option], title: str):

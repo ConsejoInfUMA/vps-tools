@@ -1,5 +1,5 @@
 import subprocess
-from ceetsii.helpers import User
+from ceetsii.models import User
 from requests import Session
 
 class LdapApi:

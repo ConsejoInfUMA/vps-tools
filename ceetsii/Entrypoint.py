@@ -1,7 +1,7 @@
 from os import getenv
 from ceetsii.modules.Base import Base
 from ceetsii.modules.Ldap import Ldap
-from ceetsii.helpers import Option
+from ceetsii.models import Option
 
 class Entrypoint(Base):
     ldap: Ldap
