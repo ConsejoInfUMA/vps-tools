@@ -44,7 +44,10 @@ class User:
         return [self.firstName, self.lastName, self.email, self.identifier, self.displayName, self.password]
 
     def __eq__(self, other):
-        return self.email == other.email
+        return self.identifier == other.identifier
 
     def __hash__(self) -> int:
-        return self.email.__hash__()
+        return self.identifier.__hash__()
+
+    def __str__(self) -> str:
+        return f"{self.displayName} ({self.email})"

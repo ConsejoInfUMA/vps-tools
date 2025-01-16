@@ -7,3 +7,6 @@ __pycache__
 # CSV out
 /out/*
 !/out/.gitkeep
+
+# Dev
+/lldap_data

@@ -1,5 +1,4 @@
 import csv
-
 from os import remove as removefile
 from os.path import isfile
 
@@ -10,11 +9,13 @@ from ceetsii.helpers import Option, User, LdapApi
 class Ldap(Base):
     api: LdapApi
     out_dir = "out"
+    group_id: int
     options: list
 
-    def __init__(self, base_url: str, token: str, out_dir: str):
+    def __init__(self, base_url: str, token: str, out_dir: str, group_id: int):
         self.base_url = base_url
         self.out_dir = out_dir
+        self.group_id = group_id
         self.options = [
             Option(
                 'Listar',
@@ -89,7 +90,33 @@ class Ldap(Base):
     def commit(self):
         users_add = self._readCommitCsv('add.csv')
         users_remove = self._readCommitCsv('remove.csv')
-        # TODO: Make actions
+
+        self._commitAdd(users_add)
+        self._commitRemove(users_remove)
+
+    def _commitAdd(self, users: list[User]):
+        for user in users:
+            # Add user
+            ok = self.api.addUser(user)
+            if not ok:
+                print(f"{user} Error al agregar, deteniendo proceso")
+                break
+
+            # Add to group
+            ok = self.api.addUserToGroup(user, self.group_id)
+            if not ok:
+                print(f"{user} Error al agregar a grupo, deteniendo proceso")
+                break
+
+            print(f"{user} agregado con éxito")
+
+    def _commitRemove(self, users: list[User]):
+        for user in users:
+            ok = self.api.removeUser(user)
+            if not ok:
+                print(f"{user} Error al eliminar, deteniendo progreso")
+                break
+            print(f"{user} eliminado con éxito")
 
     def _printUsers(self, users: list[User]):
         for user in users:
