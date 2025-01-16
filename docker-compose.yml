@@ -24,3 +24,8 @@ services:
       - LLDAP_KEY_SEED=REPLACE_WITH_RANDOM
       - LLDAP_LDAP_BASE_DN=dc=ceetsii,dc=uma,dc=es
       - LLDAP_LDAP_USER_PASS=password
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+        - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+        - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'

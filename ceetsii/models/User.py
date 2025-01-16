@@ -5,14 +5,16 @@ class User:
     firstName: str
     lastName: str
     email: str
+    subject: str
     identifier: str
     displayName: str
     password: str
 
-    def __init__(self, firstName: str, lastName: str, email: str, identifier: str = None, displayName: str = None, password: str = None):
+    def __init__(self, firstName: str, lastName: str, email: str, subject: str, identifier: str = None, displayName: str = None, password: str = None):
         self.firstName = firstName
         self.lastName = lastName
         self.email = email
+        self.subject = subject
 
         if identifier is None:
             self.identifier = self.email.split('@')[0]
@@ -35,13 +37,22 @@ class User:
             firstName=row[0],
             lastName=row[1],
             email=row[2],
-            identifier=row[3],
-            displayName=row[4],
-            password=row[5]
+            subject=row[3],
+            identifier=row[4],
+            displayName=row[5],
+            password=row[6]
         )
 
     def toRow(self) -> list:
-        return [self.firstName, self.lastName, self.email, self.identifier, self.displayName, self.password]
+        return [
+            self.firstName,
+            self.lastName,
+            self.email,
+            self.subject,
+            self.identifier,
+            self.displayName,
+            self.password
+        ]
 
     def __eq__(self, other):
         return self.identifier == other.identifier

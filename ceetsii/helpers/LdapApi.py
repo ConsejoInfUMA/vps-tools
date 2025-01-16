@@ -50,6 +50,7 @@ class LdapApi:
                 firstName=user["firstName"],
                 lastName=user["lastName"],
                 email=user["email"],
+                subject='',
                 identifier=user["id"],
                 displayName=user["displayName"],
                 password=''
@@ -102,9 +103,9 @@ class LdapApi:
             # Change password
             cmd = subprocess.run([
                 # Producción
-                "lldap_set_password",
+                #"lldap_set_password",
                 # Desarrollo
-                #"docker", "compose", "exec", "lldap", "/app/lldap_set_password",
+                "docker", "compose", "exec", "lldap", "/app/lldap_set_password",
                 "--base-url", self.base_url,
                 "--token", self.token,
                 "--username", user.identifier,

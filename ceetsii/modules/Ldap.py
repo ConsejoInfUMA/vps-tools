@@ -3,16 +3,17 @@ from os import remove as removefile
 from os.path import isfile
 
 from ceetsii.modules.Base import Base
-from ceetsii.helpers import LdapApi
+from ceetsii.helpers import LdapApi, Mail
 from ceetsii.models import Option, User
 
 class Ldap(Base):
     api: LdapApi
+    mail: Mail
     out_dir = "out"
     group_id: int
     options: list
 
-    def __init__(self, base_url: str, token: str, out_dir: str, group_id: int):
+    def __init__(self, base_url: str, token: str, out_dir: str, group_id: int, mail_host: str, mail_port: int, mail_user: str, mail_pass: str):
         self.base_url = base_url
         self.out_dir = out_dir
         self.group_id = group_id
@@ -28,10 +29,15 @@ class Ldap(Base):
             Option(
                 'Aplicar CSV generado',
                 self.commit
+            ),
+            Option(
+                'Enviar correos de bienvenida',
+                self.welcome
             )
         ]
 
         self.api = LdapApi(base_url, token)
+        self.mail = Mail(mail_host, mail_port, mail_user, mail_pass, base_url)
 
     def main(self):
         self._pick(self.options, "Elige una acción")
@@ -46,6 +52,7 @@ class Ldap(Base):
         Columna 1: Nombre
         Columna 2: Apellidos
         Columna 3: Correo electrónico
+        Columna 10: Asignatura que representa
         """
 
         csvStr = input("Escribe el path en el que se encuentra el documento:")
@@ -65,7 +72,8 @@ class Ldap(Base):
                     excel_users.append(User(
                         firstName=row[0],
                         lastName=row[1],
-                        email=row[2]
+                        email=row[2],
+                        subject=row[9]
                     ))
 
         # Eliminamos duplicados
@@ -94,6 +102,11 @@ class Ldap(Base):
         self._commitAdd(users_add)
         self._commitRemove(users_remove)
 
+    def welcome(self):
+        users_add = self._readCommitCsv('add.csv')
+
+        self.mail.sendWelcome(users_add)
+
     def _commitAdd(self, users: list[User]):
         for user in users:
             # Add user
@@ -116,6 +129,7 @@ class Ldap(Base):
             if not ok:
                 print(f"{user} Error al eliminar, deteniendo progreso")
                 break
+
             print(f"{user} eliminado con éxito")
 
     def _printUsers(self, users: list[User]):
@@ -136,9 +150,10 @@ class Ldap(Base):
                     firstName=row[0],
                     lastName=row[1],
                     email=row[2],
-                    identifier=row[3],
-                    displayName=row[4],
-                    password=row[5]
+                    subject=row[3],
+                    identifier=row[4],
+                    displayName=row[5],
+                    password=row[6]
                 ))
 
         return users

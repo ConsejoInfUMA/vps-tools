@@ -13,7 +13,11 @@ class Entrypoint(Base):
             base_url=getenv("LLDAP_BASE", "http://localhost:17170"),
             token=getenv("LLDAP_TOKEN", ""),
             out_dir=getenv("LLDAP_OUT", "out"),
-            group_id=int(getenv("LLDAP_GROUP_ID", -1))
+            group_id=int(getenv("LLDAP_GROUP_ID", -1)),
+            mail_host=getenv("MAIL_HOST", "localhost"),
+            mail_port=int(getenv("MAIL_PORT", 1025)),
+            mail_user=getenv("MAIL_USERNAME", "test@example.com"),
+            mail_pass=getenv("MAIL_PASSWORD", "")
         )
 
         self.options = [
