@@ -87,11 +87,34 @@ class Ldap(Base):
         print("Se han generado los csvs con los cambios a hacer al servidor LDAP")
 
     def commit(self):
-        pass
+        users_add = self._readCommitCsv('add.csv')
+        users_remove = self._readCommitCsv('remove.csv')
+        # TODO: Make actions
 
     def _printUsers(self, users: list[User]):
         for user in users:
             print(f"{user.displayName} ({user.email})")
+
+    def _readCommitCsv(self, filename: str) -> list[User]:
+        path = f"{self.out_dir}/{filename}"
+        if not isfile(path):
+            raise Exception(f"{path} no existe")
+
+        users = []
+        with open(path) as csvFile:
+            reader = csv.reader(csvFile, delimiter=',', quotechar='"')
+            next(reader, None)  # Ignoramos el header
+            for row in reader:
+                users.append(User(
+                    firstName=row[0],
+                    lastName=row[1],
+                    email=row[2],
+                    identifier=row[3],
+                    displayName=row[4],
+                    password=row[5]
+                ))
+
+        return users
 
     def _writeUsersCsv(self, users: list[User], filename: str):
         path = f"{self.out_dir}/{filename}"
