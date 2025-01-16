@@ -1,5 +1,6 @@
 import csv
 
+from os import remove as removefile
 from os.path import isfile
 
 from requests import Session
@@ -11,10 +12,12 @@ class Ldap(Base):
     s = Session()
 
     base_url: str
+    out_dir = "out"
     options: list
 
-    def __init__(self, base_url: str, token: str):
+    def __init__(self, base_url: str, token: str, out_dir: str):
         self.base_url = base_url
+        self.out_dir = out_dir
         self.options = [
             Option(
                 'Listar',
@@ -23,6 +26,10 @@ class Ldap(Base):
             Option(
                 'Importar',
                 self.csv
+            ),
+            Option(
+                'Aplicar CSV generado',
+                self.commit
             )
         ]
 
@@ -47,10 +54,10 @@ class Ldap(Base):
         """
 
         csvStr = input("Escribe el path en el que se encuentra el documento:")
-        
+
         if not isfile(csvStr):
             raise Exception("Ese archivo no existe")
-        
+
         excel_users = []
         ldap_users = self._getUsers()
 
@@ -63,10 +70,9 @@ class Ldap(Base):
                     excel_users.append(User(
                         firstName=row[0],
                         lastName=row[1],
-                        email=row[2],
-                        autogen_password=True
+                        email=row[2]
                     ))
-        
+
         # Eliminamos duplicados
         filtered_excel_users = list(set(excel_users))
 
@@ -79,21 +85,16 @@ class Ldap(Base):
         users_ok.sort(key=lambda u: u.firstName)
         users_remove.sort(key=lambda u: u.firstName)
 
-        print("Añadir:")
-        print("-----")
-        self._printUsers(users_add)
-        print("-----")
-        print("No modificar:")
-        print("-----")
-        self._printUsers(users_ok)
-        print("-----")
-        print("Eliminar:")
-        print("-----")
-        self._printUsers(users_remove)
-        print("-----")
+        # Generamos los csvs
+        self._writeUsersCsv(users_add, 'add.csv')
+        self._writeUsersCsv(users_ok, 'ok.csv')
+        self._writeUsersCsv(users_remove, 'remove.csv')
 
-        
-    
+        print("Se han generado los csvs con los cambios a hacer al servidor LDAP")
+
+    def commit(self):
+        pass
+
     def _getUsers(self)-> list[User]:
         res = self._req({
             "operationName": "ListUsersQuery",
@@ -130,18 +131,29 @@ class Ldap(Base):
                 email=user["email"],
                 identifier=user["id"],
                 displayName=user["displayName"],
-                autogen_password=False
+                password=''
             ))
-        
+
         return users
-    
+
     def _printUsers(self, users: list[User]):
         for user in users:
             print(f"{user.displayName} ({user.email})")
+
+    def _writeUsersCsv(self, users: list[User], filename: str):
+        path = f"{self.out_dir}/{filename}"
+        if isfile(path):
+            removefile(path)
+
+        with open(path, 'w') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(["Nombre", "Apellidos", "Email", "Nombre de usuario", "Nombre completo", "Contraseña"])
+            for user in users:
+                writer.writerow(user.toRow())
 
     def _req(self, body: dict)-> dict:
         res = self.s.post(f"{self.base_url}/api/graphql", json=body)
         if not res.ok:
             raise Exception("Graphql error")
-        
+
         return res.json()
