@@ -3,7 +3,7 @@ from email.mime.text import MIMEText
 from ceetsii.models.User import User
 
 TEMPLATE = """
-Hola {name},
+Hola {firstName},
 
 Debido a que eres representante de la asignatura "{subject}", formas parte oficialmente del Consejo de Estudiantes.
 
@@ -23,7 +23,7 @@ Contraseña: {password}
 Puedes cambiar tu contraseña en {url}
 """
 
-TITLE = "¡Bienvenid@ al CEETSII!"
+TITLE = "¡Bienvenid@ al CEETSII, {firstName}!"
 
 class Mail:
     server: str
@@ -49,7 +49,7 @@ class Mail:
         for user in users:
             msg = MIMEText(
                 TEMPLATE.format(
-                    name=user.displayName,
+                    firstName=user.firstName,
                     subject=user.subject,
                     url=self.base_url,
                     username=user.identifier,
@@ -57,7 +57,7 @@ class Mail:
                 )
             )
 
-            msg["Subject"] = "¡Bienvenido al CEETSII!"
+            msg["Subject"] = TITLE.format(firstName=user.firstName)
             msg["From"] = self.username
             msg["To"] = user.email
 

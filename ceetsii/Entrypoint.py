@@ -11,6 +11,7 @@ class Entrypoint(Base):
     def __init__(self):
         self.ldap = Ldap(
             base_url=getenv("LLDAP_BASE", "http://localhost:17170"),
+            input_path=getenv("LLDAP_INPUT_PATH", "input.csv"),
             token=getenv("LLDAP_TOKEN", ""),
             out_dir=getenv("LLDAP_OUT", "out"),
             group_id=int(getenv("LLDAP_GROUP_ID", -1)),
