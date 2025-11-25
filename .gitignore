@@ -1,7 +1,8 @@
 /input.csv
 /.venv
 
-.env
+/.vscode
+/.env
 __pycache__
 
 # CSV out
